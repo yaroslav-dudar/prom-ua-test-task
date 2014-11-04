@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>E-Lib</title>
+		<meta charset='utf8'>
+	</head>
+	<body>
+		<form action='/search' method='post' name='search'>
+			<input type='text' name='search_query'>
+			<input type='submit' value='Search'>
+		</form>
+		{% for book in books%}
+			<p> {{book.title}} </p>
+			{% for writer in book.writers%}
+				<p style='font-size:10px'> {{writer.name}} </p>
+			{% endfor%}
+		{% endfor %}
+	</body>
+</html>

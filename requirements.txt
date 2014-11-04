@@ -1,0 +1,4 @@
+flask==0.10.1
+sqlalchemy==0.9.8
+jinja2==2.7.3
+wtforms==2.0.1
