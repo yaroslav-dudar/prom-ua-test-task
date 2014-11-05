@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+
+<form action='/search' method='post' name='search'>
+	<input type='text' name='search_query'>
+	<input type='submit' value='Search'>
+</form>
+{% for book in books%}
+	<p> {{book.title}} </p>
+	{% for writer in book.writers%}
+		<p style='font-size:10px'> {{writer.name}} </p>
+	{% endfor%}
+{% endfor %}
+<hr>
+{% if error %}
+	<p style='color:red;'> Please enter a correct username and password </p>
+{% endif %}
+<form action='/' method='post'>
+	{% for field in form %}
+		<div style='width: 100px'>
+			{{field.label}}
+		</div>
+		<div>
+			{{field}}
+		</div>
+	{% endfor %}
+	<input type='submit' value='Log In'>
+</form>
+
+{% endblock %}
