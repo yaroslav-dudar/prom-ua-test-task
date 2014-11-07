@@ -33,6 +33,9 @@ class Writer(Base):
 	id = Column(Integer, primary_key=True)
 	name = Column(String)
 
+	def __repr__(self):
+		return self.name
+
 
 class User(Base):
 	__tablename__ = 'users'
@@ -42,4 +45,3 @@ class User(Base):
 	first_name = Column(String)
 	last_name = Column(String)
 	staff = Column(Boolean)
-	

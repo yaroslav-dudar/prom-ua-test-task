@@ -1,8 +1,10 @@
-from wtforms import Form, PasswordField, TextField, validators
+from wtforms import (Form, PasswordField, TextField,
+	validators, HiddenField)
+from wtforms.ext.sqlalchemy.fields import QuerySelectMultipleField
 from wtforms.validators import ValidationError
 
 from database import db_session
-from models import User
+from models import User, Writer, Book
 
 class AuthForm(Form):	
 	email = TextField('Email', [validators.Length(min=6, max=120), validators.Email()])
@@ -22,3 +24,37 @@ class RegistrationForm(Form):
 	password = PasswordField('Password', [validators.Required(),
 		validators.EqualTo('confirm', message='Passwords must match'),validators.Length(min=6, max=16)])
 	confirm = PasswordField('Repeat Password')
+
+
+class WriterEditForm(Form):
+	id = HiddenField('id')
+	name = TextField('Name', [validators.Length(min=2, max=50)])
+
+	def validate_name(self, field):
+		writer = db_session.query(Writer).filter(Writer.name == field.data,
+			Writer.id != self.id).first()
+		if writer:
+			raise ValidationError('Existing writer with the same name.')
+
+
+class WriterAddForm(Form):
+	name = TextField('Name', [validators.Length(min=2, max=50)])
+
+	def validate_name(self, field):
+		writer = db_session.query(Writer).filter(Writer.name == field.data).first()
+		if writer:
+			raise ValidationError('Existing writer with the same name.')
+
+
+class BookAddForm(Form):
+	writers = QuerySelectMultipleField('Writers', query_factory=Writer.query.all)
+	title = TextField('Title', [validators.Length(min=2, max=100)])
+
+	def validate_title(self, field):
+		book = db_session.query(Book).filter_by(title=field.data).first()
+		if book:
+			raise ValidationError('Existing book with the same title.')
+
+	def validate_writers(self, field):
+		if len(field.data) == 0:
+			raise ValidationError('Please add writer(s) for current book.')
