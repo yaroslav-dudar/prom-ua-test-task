@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<header>
+	<a href="/logout">Logout</a>
+	<a href="/books">Books</a>
+	<a href="/">Search</a>
+</header>
+{% for writer in writers %}
+	<form action='/writers' method='post'>
+		{{ writer_edit_form.id(value=writer.id) }}
+		{{ writer_edit_form.name(value=writer.name) }}
+		<input type='submit' value='Edit' name='btn'>
+		<a href="/delete_writer/{{writer.id}}">Delete</a>
+	</form>
+{% endfor %}
+<div class='error'>
+	{% for error in writer_edit_form.name.errors %}
+		{{ error }}
+	{% endfor %}
+</div>
+<h2>Add Writer</h2>
+<form action='/writers' method='post'>
+	{{ writer_add_form.name.label }}
+	{{ writer_add_form.name }}
+	<input type='submit' value='Add Writer' name='btn'>
+</form>
+{% for error in writer_add_form.name.errors %}
+	<div class='error'>{{error}}</div>
+{% endfor %}
+{% endblock %}

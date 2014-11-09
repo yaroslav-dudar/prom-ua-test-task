@@ -3,8 +3,13 @@
 	<head>
 		<title>E-Lib</title>
 		<meta charset='utf8'>
+		<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}?v=23">
+		<script src='{{url_for('static', filename='jquery.js')}}'></script>
+		<script src='{{url_for('static', filename='search.js')}}?v=222'></script>
 	</head>
 	<body>
-	{% block content %} {% endblock %}
+		<div id='content' style='width: 960px; margin: auto;'>
+		{% block content %} {% endblock %}
+		</div>
 	</body>
 </html>

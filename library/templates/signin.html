@@ -1,19 +1,18 @@
 {% extends "base.html" %}
 {% block content %}
 
-{% if error %}
-	<p style='color:red;'> Please enter a correct username and password </p>
-{% endif %}
-<form action='/signin' method='post'>
-	{% for field in form %}
-		<div style='width: 100px'>
-			{{field.label}}
-		</div>
-		<div>
-			{{field}}
-		</div>
-	{% endfor %}
-	<input type='submit' value='Log In'>
-</form>
+<div class='form'>
+	<form action='/signin' method='post'>
+		{% for field in form %}
+			{{field(placeholder=field.label.text, class='input-field')}}
+		{% endfor %}
+		{% if error %}
+		<div class='error'> Please enter a correct username and password </div>
+		{% endif %}
+		<input type='submit' value='Log In' class='submit-button'>
+	</form>
+
+</div>
+
 
 {% endblock %}

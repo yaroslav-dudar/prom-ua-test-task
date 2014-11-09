@@ -1,19 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
-	<h3> Registration </h3>
-	<form action='/signup' method='post'>
-		{% for field in form %}
-			<div>
-				{{ field.label }}
-				{{ field }}
-			</div> 
-			<div>
+	<div class='form'>
+		<form action='/signup' method='post'>
+			{% for field in form %}
+				{{ field(placeholder=field.label.text, class='input-field') }}
 				{% for error in field.errors %}
-					<p style='color:red;'>{{error}}</p>
+					<div class='error'>{{error}}</div>
 				{% endfor %}
-			</div>
-		{% endfor %}
-		<input type='submit' value='Sign Up'>
-	</form>
+			{% endfor %}
+			<input type='submit' value='Sign Up' class='submit-button'>
+		</form>
+	</div>
 	
 {% endblock %}
