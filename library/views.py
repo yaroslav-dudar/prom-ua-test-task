@@ -8,6 +8,7 @@ from decorators import login_required, login
 from models import Book, Writer, User
 from forms import (AuthForm, RegistrationForm, WriterEditForm,
     WriterAddForm, BookAddForm, BookEditForm)
+import os
 
 app = Flask(__name__)
 app.secret_key = 'A0Zr98j/MyXoR~hHH!jmN]LWX/,?RT'
@@ -144,4 +145,5 @@ def delete_book(book_id):
 
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
