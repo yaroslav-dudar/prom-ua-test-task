@@ -8,7 +8,7 @@ from models import User, Writer, Book
 
 class AuthForm(Form):	
 	email = TextField('Email', [validators.Length(min=6, max=120), validators.Email()])
-	password =  PasswordField('Password', [validators.Length(min=6, max=25)])
+	password =  PasswordField('Password', [validators.Length(min=4, max=25)])
 
 	def validate_email(self, field):
 		user = db_session.query(User).filter(
@@ -24,6 +24,11 @@ class RegistrationForm(Form):
 	password = PasswordField('Password', [validators.Required(),
 		validators.EqualTo('confirm', message='Passwords must match'),validators.Length(min=6, max=16)])
 	confirm = PasswordField('Repeat Password')
+
+	def validate_email(self, field):
+		user = User.query.filter(User.email == field.data).first()
+		if user:
+			raise ValidationError('Existing user with the same email.')
 
 
 class WriterEditForm(Form):

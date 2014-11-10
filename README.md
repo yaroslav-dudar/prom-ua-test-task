@@ -4,5 +4,6 @@ Installation
 - cd prom-ua-test-task
 - virtualenv .env
 - pip install -r requirements.txt
+- sqlite3 library.db < db.sql
 - python library/views.py 
 

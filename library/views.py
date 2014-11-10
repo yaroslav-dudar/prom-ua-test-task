@@ -30,7 +30,7 @@ def login_required(access):
 
 
 @app.route('/', methods=['GET', 'POST'])
-@login_required('all_users')
+@login_required('all-users')
 def index():
     if request.method == 'GET':
         return render_template('index.html', search_results='')
@@ -81,7 +81,7 @@ def signin():
 
 
 @app.route('/logout', methods=['GET'])
-@login_required('all_users')
+@login_required('all-users')
 def logout():
     session.pop('user', None)
     return redirect(url_for('signin'))
