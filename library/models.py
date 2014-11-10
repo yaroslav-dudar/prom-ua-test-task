@@ -81,12 +81,12 @@ class User(Base):
     password = Column(String, nullable=False)
     first_name = Column(String)
     last_name = Column(String)
-    staff = Column(Boolean)
+    staff = Column(Boolean, default=True)
 
     @staticmethod
     def add(email, password, first_name, last_name, staff):
         user = User(email=email, password=password, first_name=first_name,
-            last_name=last_name, staff=False)
+            last_name=last_name, staff=staff)
         db_session.add(user)
         db_session.commit()
         return user
