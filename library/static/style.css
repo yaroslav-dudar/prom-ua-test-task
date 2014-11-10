@@ -66,3 +66,9 @@ form#search-form {
 #content header a:hover {
 	color: #0A948F;	
 }
+
+a.link {
+	color: #0CADA7;
+	text-decoration: none;
+	font-weight: bold;
+}

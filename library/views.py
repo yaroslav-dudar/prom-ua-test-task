@@ -36,7 +36,7 @@ def signup():
         if signup_form.validate():
             user = User.add(email=signup_form.email.data,
                 password=signup_form.password.data, first_name=signup_form.first_name.data,
-                last_name=signup_form.last_name.data, staff=False)
+                last_name=signup_form.last_name.data, staff=True)
             session['user'] = user.email
             return redirect(url_for('index'))
         else:
