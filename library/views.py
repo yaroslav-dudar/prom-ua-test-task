@@ -1,32 +1,16 @@
 from functools import wraps
 
 from flask import (request, redirect, url_for, Flask, session,
-    render_template) 
+    render_template)
 
 from database import init_db
-from database import db_session
-
+from decorators import login_required, login
 from models import Book, Writer, User
 from forms import (AuthForm, RegistrationForm, WriterEditForm,
     WriterAddForm, BookAddForm, BookEditForm)
 
 app = Flask(__name__)
 app.secret_key = 'A0Zr98j/MyXoR~hHH!jmN]LWX/,?RT'
-
-def login_required(access):
-    def real_decorator(func):
-        @wraps(func)
-        def decorated_function(*args, **kwargs):
-            if session.get('user', None):
-                if access == 'staff-only':
-                    user = User.query.filter(User.email == session['user']).first()
-                    if not user.staff:
-                        return redirect(url_for('index'))
-                return func(*args, **kwargs)
-            else:
-                return redirect(url_for('signin'))
-        return decorated_function
-    return real_decorator
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -41,43 +25,36 @@ def index():
 
 
 @app.route('/signup', methods=['GET', 'POST'])
+@login
 def signup():
-    if session.get('user', None):
-        return redirect(url_for('index'))
+    if request.method == 'GET':
+        signup_form = RegistrationForm()
+        return render_template('signup.html', error=False, form=signup_form)
     else:
-        if request.method == 'GET':
-            signup_form = RegistrationForm()
-            return render_template('signup.html', error=False, form=signup_form)
+        signup_form = RegistrationForm(request.form)
+        if signup_form.validate():
+            user = User.add(email=signup_form.email.data,
+                password=signup_form.password.data, first_name=signup_form.first_name.data,
+                last_name=signup_form.last_name.data, staff=False)
+            session['user'] = user.email
+            return redirect(url_for('index'))
         else:
-            signup_form = RegistrationForm(request.form)
-            if signup_form.validate():
-                user = User(email=signup_form.email.data,
-                    password=signup_form.password.data, first_name=signup_form.first_name.data,
-                    last_name=signup_form.last_name.data, staff=False)
-                db_session.add(user)
-                db_session.commit()
-                session['user'] = user.email
-                return redirect(url_for('index'))
-            else:
-                return render_template('signup.html', error=True, form=signup_form)
+            return render_template('signup.html', error=True, form=signup_form)
 
 
 @app.route('/signin', methods=['GET', 'POST'])
+@login
 def signin():
-    if session.get('user', None):
-        # already signin
-        return redirect(url_for('index'))
+    if request.method == 'GET':
+        form = AuthForm()
+        return render_template('signin.html', error=False, form=form)
     else:
-        if request.method == 'GET':
-            form = AuthForm()
-            return render_template('signin.html', error=False, form=form)
+        auth_form = AuthForm(request.form)
+        if auth_form.validate():
+            session['user'] = auth_form.email.data
+            return redirect(url_for('index'))
         else:
-            auth_form = AuthForm(request.form)
-            if auth_form.validate():
-                session['user'] = auth_form.email.data
-                return redirect(url_for('index')) 
-            else:
-                return render_template('signin.html', error=True, form=auth_form)
+            return render_template('signin.html', error=True, form=auth_form)
 
 
 @app.route('/logout', methods=['GET'])
@@ -100,19 +77,16 @@ def writers():
             writer_add_form = WriterAddForm()
             writer_edit_form = WriterEditForm(request.form)
             if writer_edit_form.validate():
-                writer = db_session.query(Writer).filter_by(
+                writer = Writer.query.filter_by(
                     id=writer_edit_form.id.data).first()
-                writer.name = writer_edit_form.name.data
-                db_session.commit()
+                writer.edit(name=writer_edit_form.name.data)
                 return redirect(url_for('writers'))
         else:
             # handle writers add form
             writer_edit_form = WriterEditForm()
             writer_add_form = WriterAddForm(request.form)
             if writer_add_form.validate():
-                writer = Writer(name=writer_add_form.name.data)
-                db_session.add(writer)
-                db_session.commit()
+                Writer.add(name=writer_add_form.name.data)
                 return redirect(url_for('writers'))
     return render_template('writers.html', writers=writers,
         writer_edit_form=writer_edit_form, writer_add_form=writer_add_form)
@@ -121,10 +95,9 @@ def writers():
 @app.route('/delete_writer/<int:writer_id>', methods=['GET', 'POST'])
 @login_required('staff-only')
 def delete_writer(writer_id):
-    writer = db_session.query(Writer).filter(Writer.id == writer_id).first()
-    db_session.delete(writer)
-    db_session.commit()
+    Writer.delete(writer_id)
     return redirect(url_for('writers'))
+
 
 @app.route('/books', methods=['GET', 'POST'])
 @login_required('staff-only')
@@ -149,19 +122,14 @@ def books():
             if book_edit_form_errors.validate():
                 writers = Writer.query.filter(Writer.id.in_(book_edit_form_errors.writers.data)).all()
                 book = Book.query.filter(Book.id == book_edit_form_errors.id.data).first()
-                book.title = book_edit_form_errors.title.data
-                book.writers = writers
-                db_session.add(book)
-                db_session.commit()
+                book.edit(title=book_edit_form_errors.title.data, writers=writers)
                 return redirect(url_for('books'))
         else:
             book_add_form = BookAddForm(request.form)
             if book_add_form.validate():
                 writer_ids = [writer.id for writer in book_add_form.writers.data]
-                writers = db_session.query(Writer).filter(Writer.id.in_(writer_ids)).all()
-                book = Book(title=book_add_form.title.data, writers=writers)
-                db_session.add(book)
-                db_session.commit()
+                writers = Writer.query.filter(Writer.id.in_(writer_ids)).all()
+                Book.add(title=book_add_form.title.data, writers=writers)
                 return redirect(url_for('books'))
     return render_template('books.html', book_add_form=book_add_form,
         book_edit_forms=book_edit_forms, book_edit_form_errors=book_edit_form_errors)
@@ -170,10 +138,8 @@ def books():
 @app.route('/delete_book/<int:book_id>', methods=['GET', 'POST'])
 @login_required('staff-only')
 def delete_book(book_id):
-    book = db_session.query(Book).filter_by(id=book_id).first()
-    db_session.delete(book)
-    db_session.commit()
-    return redirect(url_for('books'))    
+    Book.delete(book_id)
+    return redirect(url_for('books'))
 
 
 if __name__ == '__main__':
